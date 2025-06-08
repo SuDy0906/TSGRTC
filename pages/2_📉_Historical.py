@@ -32,33 +32,50 @@ trend_type = filters['trend_view_option']
 
 if trend_type == "Passenger Trends":
 # Title and description
+    import streamlit as st
+    import pandas as pd
+    import plotly.graph_objects as go
+
     st.title("📊 Historical Passenger Trends by Weekday")
     st.markdown("""
     Compare historical total passenger counts across weekdays for the years **2022–2024**.  
     The **most popular weekday** is <span style="color:#FF6B93;"><strong>highlighted with a border</strong></span>.
     """, unsafe_allow_html=True)
 
-    # Load and prepare data
-    trend_data, pie_data = load_weekday_trends_data()
+    
 
-    # Step 1: Find the weekday with max total across years
+    # Map integers to weekday names
+    day_map = {
+        0: 'Monday', 1: 'Tuesday', 2: 'Wednesday',
+        3: 'Thursday', 4: 'Friday', 5: 'Saturday', 6: 'Sunday'
+    }
+    df['Weekday'] = df['Day Type'].map(day_map)
+    df['Year'] = df['date'].dt.year
+
+    # Filter years
+    df = df[df["Year"].isin([2022, 2023, 2024])]
+
+    # Weekday order
+    ordered_days = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"]
+    df['Weekday'] = pd.Categorical(df['Weekday'], categories=ordered_days, ordered=True)
+
+    # --- Prepare Data for Bar Chart ---
+    trend_data = df.groupby(['Year', 'Weekday'])['total_passengers'].sum().reset_index()
+
+    # Find max weekday over all years
     weekday_total = trend_data.groupby("Weekday")["total_passengers"].sum()
     max_weekday = weekday_total.idxmax()
 
-# Step 2: Define colors per year
+    # --- Bar Chart ---
     year_colors = {
-    2022: "#4682B4",  # dark steel blue
-    2023: "#2E8B57",  # dark forest green
-    2024: "#E97451"   # dark red/burgundy
+        2022: "#4682B4",
+        2023: "#2E8B57",
+        2024: "#E97451"
     }
     bar_opacity = 0.9
     border_width_default = 0.6
     border_width_highlight = 2
 
-    # Weekday order
-    ordered_days = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"]
-
-    # Step 3: Bar Chart
     fig_bar = go.Figure()
     years = sorted(trend_data["Year"].unique())
 
@@ -94,25 +111,27 @@ if trend_type == "Passenger Trends":
         plot_bgcolor="#1E1E1E",
         paper_bgcolor="#1E1E1E",
         font=dict(color="white"),
-            legend=dict(title="Year", orientation="h", y=-0.2),
+        legend=dict(title="Year", orientation="h", y=-0.2),
         bargap=0.15
     )
 
-    # Show Bar Chart
     st.plotly_chart(fig_bar, use_container_width=True)
 
     # --- Pie Chart Section ---
     st.markdown("### 🥧 Weekday Share of Total Passengers (2022–2024)")
 
-    # Define dull colors for weekdays
+    pie_data = trend_data.groupby('Weekday')['total_passengers'].sum().reset_index()
+    total = pie_data['total_passengers'].sum()
+    pie_data['percentage'] = round(100 * pie_data['total_passengers'] / total, 2)
+
     weekday_colors = {
-        "Monday": "#A398D1",    # dark slate blue
-        "Tuesday": "#5F9EA0",   # dark moss green
-        "Wednesday": "#708D81", # dark khaki / muted brown
-        "Thursday": "#C2B280",  # dark lavender purple
-        "Friday": "#9C6B6B",    # dark gold / mustard
-        "Saturday": "#61788C",  # dark steel blue variant
-        "Sunday": "#C97C5D"     # dark gray-blue
+        "Monday": "#A398D1",
+        "Tuesday": "#5F9EA0",
+        "Wednesday": "#708D81",
+        "Thursday": "#C2B280",
+        "Friday": "#9C6B6B",
+        "Saturday": "#61788C",
+        "Sunday": "#C97C5D"
     }
 
     fig_pie = go.Figure(
@@ -140,8 +159,8 @@ if trend_type == "Passenger Trends":
         margin=dict(t=50, b=0, l=0, r=0)
     )
 
-# Show Pie Chart
     st.plotly_chart(fig_pie, use_container_width=True)
+
 
 
     st.subheader("🧍 Passengers vs Buses (Daily - Monthly View)")
@@ -208,18 +227,27 @@ if trend_type == "Passenger Trends":
 
 # If Revenue Trends selected
 elif trend_type == "Revenue Trends":
+
     st.title("💰 Monthly Revenue Trends")
 
-    # Load revenue data
-    revenue_df = get_monthly_fare_summary()
+    # Extract year and month
+    df['Year'] = df['date'].dt.year
+    df['Month'] = df['date'].dt.month
 
-    # Year selection
+    # Group and sum
+    monthly_fare = df.groupby(['Year', 'Month'])['total_fare'].sum().reset_index()
+
+    # Add month names
+    monthly_fare['Month_Name'] = pd.to_datetime(monthly_fare['Month'], format='%m').dt.strftime('%B')
+
+    # Sort properly
+    monthly_fare = monthly_fare.sort_values(['Year', 'Month'])
+
+    # --- UI Filter ---
     selected_year = st.selectbox("Select Year", [2022, 2023, 2024], index=2)
+    filtered_revenue = monthly_fare[monthly_fare["Year"] == selected_year]
 
-    # Filter by selected year
-    filtered_revenue = revenue_df[revenue_df["Year"] == selected_year]
-
-    # Plot revenue line chart
+    # --- Line Chart ---
     fig_revenue = go.Figure()
 
     fig_revenue.add_trace(go.Scatter(
@@ -244,6 +272,7 @@ elif trend_type == "Revenue Trends":
     )
 
     st.plotly_chart(fig_revenue, use_container_width=True)
+
 
     st.subheader("💰 Revenue vs Buses (Daily - Monthly View)")
 

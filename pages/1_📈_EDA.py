@@ -181,7 +181,10 @@ if eda_type == "Passenger & Ticket Insights":
     # df["Month_Num"] = df["date"].dt.month
 
     # Compute total full fare tickets
-    df["full_fare_tickets"] = df["no_of_full_fare_tickets_online"] + df["no_of_full_fare_tickets_offline"]
+    if 'no_of_full_fare_tickets' in df.columns:
+        df["full_fare_tickets"] = df["no_of_full_fare_tickets"]
+    else:
+        df["full_fare_tickets"] = df["no_of_full_fare_tickets_online"] + df["no_of_full_fare_tickets_offline"]
 
     # Dropdowns
     selected_year = st.selectbox("Select Year", sorted(df["Year"].unique()), key="fullfare_year")

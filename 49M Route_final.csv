@@ -1,4 +1,4 @@
-date,Day Type,Holiday,Moon Calendar,School Events,Rainfall_mm,Max_temp_celsius,Min_temp_celsius,Season,no_of_passengers,no_of_adults,no_of_children,total_fare_collected,no_of_full_fare_tickets,no_of_C/P_tickets,no_of_buses,no_of_trips,no_of_MHL_passengers,no_of_city_ordinary_bus,no_of_metro_express_bus,no_of_pallevelug_bus,no_of_other_bus,no_of_metro_delux_bus,no_of_express_bus
+date,Day Type,Holiday,Moon Calendar,School Events,Rainfall_mm,Max_temp_celsius,Min_temp_celsius,Season,total_passengers,total_adults,total_children,total_fare,no_of_full_fare_tickets,total_C/P_tickets,total_buses,no_of_trips_offline,no_of_MHL_passengers,no_of_city_ordinary_bus,no_of_metro_express_bus,no_of_pallevelug_bus,no_of_other_bus,no_of_metro_delux_bus,no_of_express_bus
 2022-04-01,4,0,0,0,0.0267456139761533,36.8221167496219,23.9415754108628,1,5354,5289,65,80705,4132,1222,18,81,0,13,5,0,0,0,0
 2022-04-02,5,2,1,2,0.0243031375937401,36.3461107537149,23.7858456575484,1,4051,3992,59,67375,3196,855,15,60,0,10,5,0,0,0,0
 2022-04-03,6,0,2,2,0.022252491872801,36.4179081708028,23.5010937529841,1,4090,4011,79,70395,3326,764,18,71,0,11,7,0,0,0,0
