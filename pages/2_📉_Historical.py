@@ -16,7 +16,8 @@ render_main_sidebar()
 filters = render_historical_sidebar()
 
 # Load weather data once and preprocess
-weather_csv_path = "Wl-Upl_final.csv"
+# weather_csv_path = "Wl-Upl_final.csv"
+print(filters["csv_path"])
 df = pd.read_csv(filters['csv_path'], parse_dates=["date"])
 df["Year"] = df["date"].dt.year
 df["Month"] = df["date"].dt.month_name()
@@ -44,86 +45,152 @@ if trend_type == "Passenger Trends":
 
     
 
-    # Map integers to weekday names
-    day_map = {
-        0: 'Monday', 1: 'Tuesday', 2: 'Wednesday',
-        3: 'Thursday', 4: 'Friday', 5: 'Saturday', 6: 'Sunday'
-    }
-    df['Weekday'] = df['Day Type'].map(day_map)
-    df['Year'] = df['date'].dt.year
+    # # Map integers to weekday names
+    # day_map = {
+    #     0: 'Monday', 1: 'Tuesday', 2: 'Wednesday',
+    #     3: 'Thursday', 4: 'Friday', 5: 'Saturday', 6: 'Sunday'
+    # }
+    # df['Weekday'] = df['Day Type'].map(day_map)
+    # df['Year'] = df['date'].dt.year
 
-    # Filter years
-    df = df[df["Year"].isin([2022, 2023, 2024])]
+    # # Filter years
+    # df = df[df["Year"].isin([2022, 2023, 2024])]
 
-    # Weekday order
-    ordered_days = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"]
-    df['Weekday'] = pd.Categorical(df['Weekday'], categories=ordered_days, ordered=True)
+    # # Weekday order
+    # ordered_days = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"]
+    # df['Weekday'] = pd.Categorical(df['Weekday'], categories=ordered_days, ordered=True)
 
-    # --- Prepare Data for Bar Chart ---
-    trend_data = df.groupby(['Year', 'Weekday'])['total_passengers'].sum().reset_index()
+    # # --- Prepare Data for Bar Chart ---
+    # trend_data = df.groupby(['Year', 'Weekday'])['total_passengers'].sum().reset_index()
 
-    # Find max weekday over all years
-    weekday_total = trend_data.groupby("Weekday")["total_passengers"].sum()
-    max_weekday = weekday_total.idxmax()
+    # # Find max weekday over all years
+    # weekday_total = trend_data.groupby("Weekday")["total_passengers"].sum()
+    # max_weekday = weekday_total.idxmax()
 
-    # --- Bar Chart ---
+    # # --- Bar Chart ---
+    # year_colors = {
+    #     2022: "#4682B4",
+    #     2023: "#2E8B57",
+    #     2024: "#E97451"
+    # }
+    # bar_opacity = 0.9
+    # border_width_default = 0.6
+    # border_width_highlight = 2
+
+    # fig_bar = go.Figure()
+    # years = sorted(trend_data["Year"].unique())
+
+    # for year in years:
+    #     year_data = trend_data[trend_data["Year"] == year].set_index("Weekday").reindex(ordered_days).reset_index()
+    #     border_widths = [
+    #         border_width_highlight if wd == max_weekday else border_width_default
+    #         for wd in year_data["Weekday"]
+    #     ]
+
+    #     fig_bar.add_trace(go.Bar(
+    #         x=year_data["Weekday"],
+    #         y=year_data["total_passengers"],
+    #         name=str(year),
+    #         marker=dict(
+    #             color=year_colors[year],
+    #             line=dict(color='white', width=border_widths)
+    #         ),
+    #         opacity=bar_opacity,
+    #         text=year_data["total_passengers"].apply(lambda x: f"{int(x):,}"),
+    #         textposition="outside",
+    #         hovertemplate="<b>%{x}</b><br>Year: "+str(year)+"<br>Passengers: %{y:,}<extra></extra>"
+    #     ))
+
+    # fig_bar.update_layout(
+    #     barmode='group',
+    #     title=dict(
+    #         text=f"📈 Passenger Distribution by Weekday (2022–2024)<br><span style='font-size:16px;'>🏆 Highest Overall: {max_weekday}</span>",
+    #         x=0.5, xanchor='center', font=dict(size=20)
+    #     ),
+    #     xaxis=dict(title="Weekday", tickfont=dict(size=13)),
+    #     yaxis=dict(title="Total Passengers", titlefont=dict(size=14), tickfont=dict(size=12), gridcolor="#444"),
+    #     plot_bgcolor="#1E1E1E",
+    #     paper_bgcolor="#1E1E1E",
+    #     font=dict(color="white"),
+    #     legend=dict(title="Year", orientation="h", y=-0.2),
+    #     bargap=0.15
+    # )
+
+    # st.plotly_chart(fig_bar, use_container_width=True)
+
+    # Filter and map weekday names
+    df_filtered = df[df["Year"].isin([2022, 2023, 2024])].copy()
+    df_filtered["Weekday"] = df_filtered["date"].dt.day_name()
+    weekday_order = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"]
+    df_filtered["Weekday"] = pd.Categorical(df_filtered["Weekday"], categories=weekday_order, ordered=True)
+
+    # Group and prepare data
+    summary_df = df_filtered.groupby(["Year", "Weekday"])["total_passengers"].sum().reset_index()
+    summary_df.sort_values(["Weekday", "Year"], inplace=True)
+
+    # Identify the most popular weekday across all years
+    total_by_weekday = summary_df.groupby("Weekday")["total_passengers"].sum()
+    most_popular_day = total_by_weekday.idxmax()
+
+    # Define colors and styles
     year_colors = {
-        2022: "#4682B4",
-        2023: "#2E8B57",
-        2024: "#E97451"
+        2022: "#4682B4",  # dark steel blue
+        2023: "#2E8B57",  # dark forest green
+        2024: "#E97451"   # dark red/burgundy
     }
-    bar_opacity = 0.9
     border_width_default = 0.6
     border_width_highlight = 2
 
-    fig_bar = go.Figure()
-    years = sorted(trend_data["Year"].unique())
+    # Plot
+    fig = go.Figure()
+    years = sorted(summary_df["Year"].unique())
 
     for year in years:
-        year_data = trend_data[trend_data["Year"] == year].set_index("Weekday").reindex(ordered_days).reset_index()
-        border_widths = [
-            border_width_highlight if wd == max_weekday else border_width_default
-            for wd in year_data["Weekday"]
-        ]
+        year_df = summary_df[summary_df["Year"] == year]
+        line_widths = [border_width_highlight if day == most_popular_day else border_width_default for day in year_df["Weekday"]]
 
-        fig_bar.add_trace(go.Bar(
-            x=year_data["Weekday"],
-            y=year_data["total_passengers"],
+        fig.add_trace(go.Bar(
+            x=year_df["Weekday"],
+            y=year_df["total_passengers"],
             name=str(year),
             marker=dict(
                 color=year_colors[year],
-                line=dict(color='white', width=border_widths)
+                line=dict(color="white", width=line_widths)
             ),
-            opacity=bar_opacity,
-            text=year_data["total_passengers"].apply(lambda x: f"{int(x):,}"),
+            text=[f"{val:,.0f}" for val in year_df["total_passengers"]],
             textposition="outside",
-            hovertemplate="<b>%{x}</b><br>Year: "+str(year)+"<br>Passengers: %{y:,}<extra></extra>"
+            hoverinfo="text",
+            hovertext=[
+                f"{day} {year}<br>Passengers: {val:,.0f}"
+                for day, val in zip(year_df["Weekday"], year_df["total_passengers"])
+            ]
         ))
 
-    fig_bar.update_layout(
-        barmode='group',
+    fig.update_layout(
+        barmode="group",
         title=dict(
-            text=f"📈 Passenger Distribution by Weekday (2022–2024)<br><span style='font-size:16px;'>🏆 Highest Overall: {max_weekday}</span>",
-            x=0.5, xanchor='center', font=dict(size=20)
+            text=f"📈 Passenger Distribution by Weekday (2022–2024)<br><span style='font-size:16px;'>🏆 Highest Overall: {most_popular_day}</span>",
+            x=0.5,
+            font=dict(size=20)
         ),
-        xaxis=dict(title="Weekday", tickfont=dict(size=13)),
-        yaxis=dict(title="Total Passengers", titlefont=dict(size=14), tickfont=dict(size=12), gridcolor="#444"),
-        plot_bgcolor="#1E1E1E",
-        paper_bgcolor="#1E1E1E",
-        font=dict(color="white"),
-        legend=dict(title="Year", orientation="h", y=-0.2),
-        bargap=0.15
+        xaxis_title="Weekday",
+        yaxis_title="Total Passengers",
+        template="plotly_dark",
+        height=550,
+        legend=dict(title="Year", orientation="h", y=-0.2)
     )
 
-    st.plotly_chart(fig_bar, use_container_width=True)
+    st.plotly_chart(fig, use_container_width=True)
+
 
     # --- Pie Chart Section ---
     st.markdown("### 🥧 Weekday Share of Total Passengers (2022–2024)")
+    # Prepare pie chart data from summary_df (already grouped by Year & Weekday)
+    pie_data = summary_df.groupby("Weekday")["total_passengers"].sum().reset_index()
+    total = pie_data["total_passengers"].sum()
+    pie_data["percentage"] = round(100 * pie_data["total_passengers"] / total, 2)
 
-    pie_data = trend_data.groupby('Weekday')['total_passengers'].sum().reset_index()
-    total = pie_data['total_passengers'].sum()
-    pie_data['percentage'] = round(100 * pie_data['total_passengers'] / total, 2)
-
+    # Color map
     weekday_colors = {
         "Monday": "#A398D1",
         "Tuesday": "#5F9EA0",
@@ -134,32 +201,36 @@ if trend_type == "Passenger Trends":
         "Sunday": "#C97C5D"
     }
 
+    # Pie chart
     fig_pie = go.Figure(
         go.Pie(
             labels=pie_data["Weekday"],
             values=pie_data["total_passengers"],
-            textinfo='label+percent',
-            textfont=dict(color='black', size=16),
+            textinfo="label+percent",
+            textfont=dict(size=16),
             hole=0.4,
             marker=dict(
                 colors=[weekday_colors.get(day, "#000000") for day in pie_data["Weekday"]],
-                line=dict(color='black', width=1.5)
+                line=dict(color="black", width=1.5)
             ),
-            pull=[0.02 if day == max_weekday else 0 for day in pie_data["Weekday"]],
+            pull=[0.05 if day == most_popular_day else 0 for day in pie_data["Weekday"]],
             hovertemplate="<b>%{label}</b><br>Passengers: %{value:,} (%{percent})<extra></extra>"
         )
     )
 
     fig_pie.update_layout(
-        title_text="📊 Passenger Share by Weekday (2022–2024)",
+        title=dict(
+            text=f"📊 Passenger Share by Weekday (2022–2024)<br><span style='font-size:16px;'>🏆 Most Popular: {most_popular_day}</span>",
+            x=0.5,
+            font=dict(size=20)
+        ),
         showlegend=False,
-        plot_bgcolor="#1E1E1E",
-        paper_bgcolor="#1E1E1E",
-        font=dict(color="black"),
-        margin=dict(t=50, b=0, l=0, r=0)
+        template="plotly_dark",
+        margin=dict(t=60, b=0, l=0, r=0)
     )
 
     st.plotly_chart(fig_pie, use_container_width=True)
+
 
 
 
