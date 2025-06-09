@@ -32,6 +32,8 @@ df.sort_values("date", inplace=True)
 trend_type = filters['trend_view_option']
 
 if trend_type == "Passenger Trends":
+    # Title of the app
+    st.title("VihariNet: AI-Driven Fleet Optimization for TGSRTC")
 # Title and description
     import streamlit as st
     import pandas as pd
@@ -298,6 +300,7 @@ if trend_type == "Passenger Trends":
 
 # If Revenue Trends selected
 elif trend_type == "Revenue Trends":
+    st.title("VihariNet: AI-Driven Fleet Optimization for TGSRTC")
 
     st.title("💰 Monthly Revenue Trends")
 
@@ -405,53 +408,58 @@ elif trend_type == "Revenue Trends":
 
 
 elif trend_type == "Weather Trends":
+    st.title("VihariNet: AI-Driven Fleet Optimization for TGSRTC")
     st.title("🌦️ Weather Impact on Passenger Demand")
 
     # Year and Month selection
     selected_year = st.selectbox("Select Year", sorted(df["Year"].unique()), index=2)
-    months_in_year = df[df["Year"] == selected_year]["Month"].unique()
-    selected_month = st.selectbox("Select Month", months_in_year)
 
-    # Filter data by selected year and month
-    df_filtered = df[(df["Year"] == selected_year) & (df["Month"] == selected_month)]
+    # Filter data for the selected year
+    df_year = df[df["Year"] == selected_year].copy()
 
-    # Sort by date
-    df_filtered.sort_values("date", inplace=True)
+    # Group by month and calculate total rainfall and passengers
+    monthly_summary = df_year.groupby("Month").agg({
+        "Rainfall_mm": "sum",
+        "total_passengers": "sum"
+    }).reset_index()
+
+    # # Convert month number to month name for better display
+    # monthly_summary["Month"] = pd.to_datetime(monthly_summary["Month"], format='%m').dt.strftime('%B')
+
+    # Maintain month order
+    month_order = ["January", "February", "March", "April", "May", "June",
+                "July", "August", "September", "October", "November", "December"]
+    monthly_summary["Month"] = pd.Categorical(monthly_summary["Month"], categories=month_order, ordered=True)
+    monthly_summary.sort_values("Month", inplace=True)
 
     # ----------------------------
-    # 1. Rainfall vs Passengers/Buses
+    # 1. Rainfall vs Passengers (Monthly View)
     # ----------------------------
-    st.subheader("🌧️ Rainfall vs Passenger Trends (Daily)")
+    st.subheader("🌧️ Monthly Rainfall vs Passenger Trends")
 
-    fig_rain = go.Figure()
+    fig_rain_monthly = go.Figure()
 
-    fig_rain.add_trace(go.Bar(
-        x=df_filtered["date"], y=df_filtered["Rainfall_mm"],
+    fig_rain_monthly.add_trace(go.Bar(
+        x=monthly_summary["Month"],
+        y=monthly_summary["Rainfall_mm"],
         name="Rainfall (mm)",
         marker_color="#4FC3F7",
         opacity=0.6,
         yaxis="y"
     ))
 
-    fig_rain.add_trace(go.Scatter(
-        x=df_filtered["date"], y=df_filtered["total_passengers"],
+    fig_rain_monthly.add_trace(go.Scatter(
+        x=monthly_summary["Month"],
+        y=monthly_summary["total_passengers"],
         name="Passengers",
         mode="lines+markers",
         line=dict(color="#76C7C0", width=2),
         yaxis="y2"
     ))
 
-    # fig_rain.add_trace(go.Scatter(
-    #     x=df_filtered["date"], y=df_filtered["total_buses"],
-    #     name="Total Buses",
-    #     mode="lines+markers",
-    #     line=dict(color="#FFD166", width=2, dash='dot'),
-    #     yaxis="y2"
-    # ))
-
-    fig_rain.update_layout(
-        title="Rainfall vs Passengers",
-        xaxis_title="Date",
+    fig_rain_monthly.update_layout(
+        title=f"Rainfall vs Passengers (Monthly) - {selected_year}",
+        xaxis_title="Month",
         yaxis=dict(title="Rainfall (mm)", side="left"),
         yaxis2=dict(title="Passengers", overlaying="y", side="right"),
         template="plotly_dark",
@@ -460,12 +468,24 @@ elif trend_type == "Weather Trends":
         margin=dict(t=50, b=50)
     )
 
-    st.plotly_chart(fig_rain, use_container_width=True)
+    st.plotly_chart(fig_rain_monthly, use_container_width=True)
+
 
     # ----------------------------
     # 2. Temperature vs Passengers/Buses
     # ----------------------------
     st.subheader("🌡️ Temperature vs Passenger Trends (Daily)")
+    
+    selected_year = st.selectbox("Select Year", sorted(df["Year"].unique()), index=2, key="weather_year")
+    months_in_year = df[df["Year"] == selected_year]["Month"].unique()
+    selected_month = st.selectbox("Select Month", months_in_year, key="weather_month")
+
+
+    # Filter data by selected year and month
+    df_filtered = df[(df["Year"] == selected_year) & (df["Month"] == selected_month)]
+
+    # Sort by date
+    df_filtered.sort_values("date", inplace=True)
 
     fig_temp = go.Figure()
 
@@ -516,7 +536,7 @@ elif trend_type == "Weather Trends":
 
 
 elif trend_type == "Holiday Impact":
-
+    st.title("VihariNet: AI-Driven Fleet Optimization for TGSRTC")
     st.subheader("🎉 Holiday Impact on Trends (Daily - Monthly View)")
 
     # Extract date info

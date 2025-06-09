@@ -33,7 +33,7 @@ df.sort_values("date", inplace=True)
 eda_type = filters['eda_view_option']
 
 if eda_type == "Passenger & Ticket Insights":
-    # Title and description
+    st.title("VihariNet: AI-Driven Fleet Optimization for TGSRTC")
     st.title("📊 Daily Passenger Trends")
     st.markdown("""
     Explore how many passengers traveled on each day for a selected **month and year**.
@@ -369,7 +369,7 @@ if eda_type == "Passenger & Ticket Insights":
 
 
 elif eda_type == "Temporal & Holiday Trends":  # assign suitable key
-
+    st.title("VihariNet: AI-Driven Fleet Optimization for TGSRTC")
 
     # ===================== PASSENGER DISTRIBUTION =====================
     st.markdown("## 🧾 Passenger Distribution by Weekday (2022–2024)")
@@ -644,7 +644,7 @@ elif eda_type == "Temporal & Holiday Trends":  # assign suitable key
 
 
 elif eda_type == "Revenue Channels & Bus Deployment": 
-
+    st.title("VihariNet: AI-Driven Fleet Optimization for TGSRTC")
     st.title("🧍 Passenger Trends: Total vs Online vs Offline")
 
     # Dropdowns for selecting Year and Month
@@ -746,7 +746,7 @@ elif eda_type == "Revenue Channels & Bus Deployment":
 
 
 elif eda_type == "External Factors & Derived Data":
-
+    st.title("VihariNet: AI-Driven Fleet Optimization for TGSRTC")
     import plotly.graph_objects as go
 
     st.title("🌙 Impact of Moon Calendar on Total Passengers")
@@ -806,7 +806,7 @@ elif eda_type == "External Factors & Derived Data":
 
 
     st.title("📈 Correlation: Weather, Events & Holiday Impact on Total Passengers")
-
+    
     st.markdown("""
     This heatmap shows the correlation of various factors (rainfall, holiday, school events, temperatures) with **total passengers**.
     A high correlation indicates a stronger relationship (positive or negative).

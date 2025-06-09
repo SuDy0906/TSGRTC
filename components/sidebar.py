@@ -9,7 +9,7 @@ def get_route_selector():
     st.sidebar.markdown("### 🛣️ Select Route")
     route_options = {
         "Warangal - Uppal": "Wl-Upl_final.csv",
-        "49 M Route": "49M Route_final.csv"
+        "49 M Route": "49M Route_final_new.csv"
     }
     selected_route = st.sidebar.selectbox("Route", list(route_options.keys()))
     return selected_route, route_options[selected_route]
