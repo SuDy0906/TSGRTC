@@ -107,3 +107,28 @@ fig_revenue.update_layout(
     legend=dict(orientation="h", y=-0.2, x=0.5, xanchor="center", yanchor="top")
 )
 st.plotly_chart(fig_revenue, use_container_width=True)
+
+
+
+st.markdown("""
+    <h3 style='text-align: center; color: #9FA8DA; margin-top: 30px; margin-bottom: 30px;'>
+        🤖 Random Forest Regressor model used for passenger prediction <br>
+        🌲 Extreme Gradient Boosted Trees model used for revenue prediction
+    </h3>
+""", unsafe_allow_html=True)
+
+# Create a DataFrame with model scores
+scores_data = {
+    'Metric': ['R Squared', 'MAE', 'MAPE', 'SMAPE', 'RMSE'],
+    'Validation': [0.8256, 997.8176, 9.2254, 8.4975, 1436.1113],
+    'Cross Validation': [0.8296, 1085.7800, 9.5227, 8.8118, 1507.3474],
+    'Holdout': [0.7973, 1124.5573, 9.0813, 8.7046, 1613.3938]
+}
+
+scores_df = pd.DataFrame(scores_data)
+st.subheader("Model Performance Metrics")
+st.dataframe(scores_df.style.format({
+    'Validation': '{:.4f}',
+    'Cross Validation': '{:.4f}',
+    'Holdout': '{:.4f}'
+}))
