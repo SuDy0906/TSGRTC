@@ -647,100 +647,106 @@ elif eda_type == "Revenue Channels & Bus Deployment":
     st.title("VihariNet: AI-Driven Fleet Optimization for TGSRTC")
     st.title("🧍 Passenger Trends: Total vs Online vs Offline")
 
-    # Dropdowns for selecting Year and Month
-    selected_year = st.selectbox("Select Year", sorted(df["Year"].unique()), index=len(df["Year"].unique()) - 1, key="passenger_year")
-    selected_month = st.selectbox("Select Month", df[df["Year"] == selected_year]["Month"].unique(), key="passenger_month")
+    # Check if CSV path matches condition
+    if filters['csv_path'] == "49M Route_final_new.csv":
+        st.markdown("### **No Data**")
+    else:
+        # Dropdowns for selecting Year and Month
+        selected_year = st.selectbox("Select Year", sorted(df["Year"].unique()), index=len(df["Year"].unique()) - 1, key="passenger_year")
+        selected_month = st.selectbox("Select Month", df[df["Year"] == selected_year]["Month"].unique(), key="passenger_month")
 
-    # Filter DataFrame for selected year and month
-    df_filtered = df[(df["Year"] == selected_year) & (df["Month"] == selected_month)].copy()
-    df_filtered.sort_values("date", inplace=True)
+        # Filter DataFrame for selected year and month 
+        df_filtered = df[(df["Year"] == selected_year) & (df["Month"] == selected_month)].copy()
+        df_filtered.sort_values("date", inplace=True)
 
-    # Create line chart
-    fig = go.Figure()
+        # Create line chart
+        fig = go.Figure()
 
-    fig.add_trace(go.Scatter(
-        x=df_filtered["date"],
-        y=df_filtered["total_passengers"],
-        mode="lines+markers",
-        name="Total Passengers",
-        line=dict(color="#66BB6A")
-    ))
+        fig.add_trace(go.Scatter(
+            x=df_filtered["date"],
+            y=df_filtered["total_passengers"],
+            mode="lines+markers", 
+            name="Total Passengers",
+            line=dict(color="#66BB6A")
+        ))
 
-    fig.add_trace(go.Scatter(
-        x=df_filtered["date"],
-        y=df_filtered["no_of_passengers_online"],
-        mode="lines+markers",
-        name="Online Passengers",
-        line=dict(color="#42A5F5")
-    ))
+        fig.add_trace(go.Scatter(
+            x=df_filtered["date"],
+            y=df_filtered["no_of_passengers_online"],
+            mode="lines+markers",
+            name="Online Passengers", 
+            line=dict(color="#42A5F5")
+        ))
 
-    fig.add_trace(go.Scatter(
-        x=df_filtered["date"],
-        y=df_filtered["no_of_passengers_offline"],
-        mode="lines+markers",
-        name="Offline Passengers",
-        line=dict(color="#FFA726")
-    ))
+        fig.add_trace(go.Scatter(
+            x=df_filtered["date"],
+            y=df_filtered["no_of_passengers_offline"],
+            mode="lines+markers",
+            name="Offline Passengers",
+            line=dict(color="#FFA726")
+        ))
 
-    fig.update_layout(
-        title=f"📈 Passenger Trend – {selected_month} {selected_year}",
-        xaxis_title="Date",
-        yaxis_title="Number of Passengers",
-        template="plotly_dark",
-        legend=dict(orientation="h"),
-        height=500
-    )
+        fig.update_layout(
+            title=f"📈 Passenger Trend – {selected_month} {selected_year}",
+            xaxis_title="Date",
+            yaxis_title="Number of Passengers",
+            template="plotly_dark",
+            legend=dict(orientation="h"),
+            height=500
+        )
 
-    st.plotly_chart(fig, use_container_width=True)
+        st.plotly_chart(fig, use_container_width=True)
 
 
     st.title("💰 Revenue Trends: Total vs Online vs Offline")
+    if filters['csv_path'] == "49M Route_final_new.csv":
+        st.markdown("### **No Data**")
+    else:
+        # Dropdowns for year and month
+        selected_year = st.selectbox("Select Year", sorted(df["Year"].unique()), index=len(df["Year"].unique()) - 1, key="revenue_year_1")
+        selected_month = st.selectbox("Select Month", df[df["Year"] == selected_year]["Month"].unique(), key="revenue_month_1")
 
-    # Dropdowns for year and month
-    selected_year = st.selectbox("Select Year", sorted(df["Year"].unique()), index=len(df["Year"].unique()) - 1, key="revenue_year_1")
-    selected_month = st.selectbox("Select Month", df[df["Year"] == selected_year]["Month"].unique(), key="revenue_month_1")
+        # Filter data
+        df_filtered = df[(df["Year"] == selected_year) & (df["Month"] == selected_month)].copy()
+        df_filtered.sort_values("date", inplace=True)
 
-    # Filter data
-    df_filtered = df[(df["Year"] == selected_year) & (df["Month"] == selected_month)].copy()
-    df_filtered.sort_values("date", inplace=True)
+        # Line Chart
+        fig = go.Figure()
 
-    # Line Chart
-    fig = go.Figure()
+        fig.add_trace(go.Scatter(
+            x=df_filtered["date"],
+            y=df_filtered["total_fare"],
+            mode="lines+markers",
+            name="Total Revenue",
+            line=dict(color="#66BB6A")
+        ))
 
-    fig.add_trace(go.Scatter(
-        x=df_filtered["date"],
-        y=df_filtered["total_fare"],
-        mode="lines+markers",
-        name="Total Revenue",
-        line=dict(color="#66BB6A")
-    ))
+        fig.add_trace(go.Scatter(
+            x=df_filtered["date"],
+            y=df_filtered["total_fare_collected_online"],
+            mode="lines+markers",
+            name="Online Revenue",
+            line=dict(color="#42A5F5")
+        ))
 
-    fig.add_trace(go.Scatter(
-        x=df_filtered["date"],
-        y=df_filtered["total_fare_collected_online"],
-        mode="lines+markers",
-        name="Online Revenue",
-        line=dict(color="#42A5F5")
-    ))
+        fig.add_trace(go.Scatter(
+            x=df_filtered["date"],
+            y=df_filtered["total_fare_collected_offline"],
+            mode="lines+markers",
+            name="Offline Revenue",
+            line=dict(color="#FFA726")
+        ))
 
-    fig.add_trace(go.Scatter(
-        x=df_filtered["date"],
-        y=df_filtered["total_fare_collected_offline"],
-        mode="lines+markers",
-        name="Offline Revenue",
-        line=dict(color="#FFA726")
-    ))
+        fig.update_layout(
+            title=f"📈 Revenue Trend – {selected_month} {selected_year}",
+            xaxis_title="Date",
+            yaxis_title="Revenue (₹)",
+            template="plotly_dark",
+            legend=dict(orientation="h"),
+            height=500
+        )
 
-    fig.update_layout(
-        title=f"📈 Revenue Trend – {selected_month} {selected_year}",
-        xaxis_title="Date",
-        yaxis_title="Revenue (₹)",
-        template="plotly_dark",
-        legend=dict(orientation="h"),
-        height=500
-    )
-
-    st.plotly_chart(fig, use_container_width=True)
+        st.plotly_chart(fig, use_container_width=True)
 
 
 
